@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/mail"
 	"strconv"
 	"sync"
 	"time"
@@ -24,7 +25,6 @@ type Email struct {
 	Subject string
 	Body    string
 	Date    time.Time
-	Data    []byte
 }
 
 type Server struct {
@@ -63,7 +63,32 @@ func (s *Session) Data(r io.Reader) error {
 	}
 
 	// Once the data is received, save the email
-	s.SaveEmail()
+	msg, err := mail.ReadMessage(r)
+	if err != nil {
+		return err
+	}
+
+	subject := msg.Header.Get("Subject")
+	body, err := io.ReadAll(msg.Body)
+	if err != nil {
+		return err
+	}
+
+	email := Email{
+		From: s.from,
+		To:   s.to,
+		Subject: subject,
+		Body: string(body),
+		Date: time.Now(),
+	}
+
+	s.server.mutex.Lock()
+	defer s.server.mutex.Unlock()
+	email.ID = s.server.nextID
+	s.server.emails[s.server.nextID] = email
+	s.server.nextID++
+
+	fmt.Printf("Received email from: %s to: %v\n", s.from, s.to)
 
 	return nil
 
@@ -79,21 +104,6 @@ func (s *Session) Logout() error {
 	return nil
 }
 
-func (s *Session) SaveEmail() {
-	email := Email{
-		From: s.from,
-		To:   s.to,
-		Data: s.data.Bytes(), // TPDP: parse this iinstead of saving bytes!
-	}
-
-	s.server.mutex.Lock()
-	defer s.server.mutex.Unlock()
-	email.ID = s.server.nextID
-	s.server.emails[s.server.nextID] = email
-	s.server.nextID++
-
-	fmt.Printf("Received email from: %s to: %v\n", s.from, s.to)
-}
 
 func NewServer() *Server {
 	tmpl := template.Must(template.ParseGlob("templates/*.html"))

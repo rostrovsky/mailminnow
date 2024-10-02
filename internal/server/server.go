@@ -99,14 +99,6 @@ func (s *Server) NewSession(c *smtp.Conn) (smtp.Session, error) {
 	return &Session{}, nil
 }
 
-func (s *Server) addEmail(email Email) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	email.ID = s.nextID
-	s.emails[s.nextID] = email
-	s.nextID++
-}
-
 func (s *Server) deleteEmail(id int) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()

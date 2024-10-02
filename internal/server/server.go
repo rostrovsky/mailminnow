@@ -58,7 +58,15 @@ func (s *Session) Rcpt(to string, opts *smtp.RcptOptions) error {
 
 func (s *Session) Data(r io.Reader) error {
 	_, err := s.data.ReadFrom(r)
-	return err
+	if err != nil {
+		return err
+	}
+
+	// Once the data is received, save the email
+	s.SaveEmail()
+
+	return nil
+
 }
 
 func (s *Session) Reset() {
@@ -75,7 +83,7 @@ func (s *Session) SaveEmail() {
 	email := Email{
 		From: s.from,
 		To:   s.to,
-		Data: s.data.Bytes(),
+		Data: s.data.Bytes(), // TPDP: parse this iinstead of saving bytes!
 	}
 
 	s.server.mutex.Lock()

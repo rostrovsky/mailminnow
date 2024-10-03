@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inbox</title>
+</head>
+<body>
+    <h1>Inbox</h1>
+    <ul>
+        {{range .}}
+            <li>
+                <a href="/email/{{.ID}}">{{.Subject}}</a> - {{.From}} ({{.Date.Format "2006-01-02 15:04:05"}})
+                <form action="/delete/{{.ID}}" method="post" style="display: inline;">
+                    <input type="submit" value="✕ Delete">
+                </form>
+            </li>
+        {{end}}
+    </ul>
+</body>
+</html>

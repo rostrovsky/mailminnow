@@ -71,6 +71,7 @@ func RunServer(cmd *cobra.Command, args []string) {
 		"domain", domain)
 
 	// Start SMTP server
+	smtpStarted := make(chan bool, 1)
 	go func() {
 		s := smtp.NewServer(server)
 		s.Addr = fmt.Sprintf(":%d", smtpPort)
@@ -81,12 +82,17 @@ func RunServer(cmd *cobra.Command, args []string) {
 		s.MaxRecipients = 50
 		s.AllowInsecureAuth = true
 
-		slog.Info("Starting SMTP server", "port", smtpPort)
+		slog.Info("Starting SMTP server...", "port", smtpPort)
+		smtpStarted <- true
 		if err := s.ListenAndServe(); err != nil {
 			slog.Error("SMTP server error", "error", err)
 			os.Exit(1)
 		}
 	}()
+
+	// Wait for SMTP server to start
+	<-smtpStarted
+	slog.Info("SMTP server started successfully", "port", smtpPort)
 
 	// Start HTTP server
 	r := mux.NewRouter()
@@ -94,10 +100,17 @@ func RunServer(cmd *cobra.Command, args []string) {
 	r.HandleFunc("/email/{id}", server.handleEmail).Methods("GET")
 	r.HandleFunc("/delete/{id}", server.handleDelete).Methods("POST")
 
-	slog.Info("Starting HTTP server", "port", httpPort)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", httpPort), r)
-	if err != nil {
-		slog.Error("HTTP server error", "error", err)
-		os.Exit(1)
-	}
+	slog.Info("Starting HTTP server...", "port", httpPort)
+	go func() {
+		err := http.ListenAndServe(fmt.Sprintf(":%d", httpPort), r)
+		if err != nil {
+			slog.Error("HTTP server error", "error", err)
+			os.Exit(1)
+		}
+	}()
+
+	slog.Info("HTTP server started successfully", "port", httpPort)
+	slog.Info("MailMinnow is now running. Press Ctrl+C to stop.")
+
+	select {}
 }

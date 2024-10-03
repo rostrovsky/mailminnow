@@ -21,8 +21,6 @@ func main() {
 		}),
 	))
 
-	cobra.OnInitialize(initConfig)
-
 	rootCmd := &cobra.Command{
 		Use:   "mailminnow",
 		Short: "A simple SMTP server with web UI",
@@ -41,9 +39,4 @@ func main() {
 		slog.Error("Failed to start server", "error", err)
 		os.Exit(1)
 	}
-}
-
-func initConfig() {
-	viper.SetEnvPrefix("SMTP_SERVER")
-	viper.AutomaticEnv()
 }

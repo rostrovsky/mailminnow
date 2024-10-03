@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{.Subject}}</title>
+</head>
+<body>
+    <h1>{{.Subject}}</h1>
+    <p><strong>From:</strong> {{.From}}</p>
+    <p><strong>Date:</strong> {{.Date.Format "2006-01-02 15:04:05"}}</p>
+    <pre>{{.Body}}</pre>
+    <a href="/">Back to Inbox</a>
+</body>
+</html>

@@ -1,10 +1,33 @@
 package server
 
 import (
-	"github.com/gorilla/mux"
+	"log/slog"
 	"net/http"
 	"strconv"
+	"time"
+
+	"github.com/gorilla/mux"
 )
+
+func LoggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		// Call the next handler
+		next.ServeHTTP(w, r)
+
+		// Log the request
+		slog.Debug("HTTP request",
+			"method", r.Method,
+			"path", r.URL.Path,
+			"remoteAddr", r.RemoteAddr,
+			"userAgent", r.UserAgent(),
+			"duration", time.Since(start),
+		)
+	})
+}
+
+// ----
 
 func (s *Server) handleInbox(w http.ResponseWriter, r *http.Request) {
 	s.mutex.Lock()
@@ -13,7 +36,7 @@ func (s *Server) handleInbox(w http.ResponseWriter, r *http.Request) {
 	for _, email := range s.emails {
 		emails = append(emails, email)
 	}
-	s.tmpl.ExecuteTemplate(w, "inbox.html", emails)
+	s.tmpl.ExecuteTemplate(w, "index.html", emails)
 }
 
 func (s *Server) handleDelete(w http.ResponseWriter, r *http.Request) {

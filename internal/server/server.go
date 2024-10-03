@@ -65,10 +65,16 @@ func RunServer(cmd *cobra.Command, args []string) {
 	httpPort := viper.GetInt("http_port")
 	domain := viper.GetString("domain")
 
+	logLevel := "INFO"
+	if viper.GetBool("verbose") {
+		logLevel = "DEBUG"
+	}
+
 	slog.Info("Server configuration",
 		"smtpPort", smtpPort,
 		"httpPort", httpPort,
-		"domain", domain)
+		"domain", domain,
+		"logLevel", logLevel)
 
 	// Start SMTP server
 	smtpStarted := make(chan bool, 1)
@@ -100,9 +106,11 @@ func RunServer(cmd *cobra.Command, args []string) {
 	r.HandleFunc("/email/{id}", server.handleEmail).Methods("GET")
 	r.HandleFunc("/delete/{id}", server.handleDelete).Methods("POST")
 
+	loggingRouter := LoggingMiddleware(r)
+
 	slog.Info("Starting HTTP server...", "port", httpPort)
 	go func() {
-		err := http.ListenAndServe(fmt.Sprintf(":%d", httpPort), r)
+		err := http.ListenAndServe(fmt.Sprintf(":%d", httpPort), loggingRouter)
 		if err != nil {
 			slog.Error("HTTP server error", "error", err)
 			os.Exit(1)

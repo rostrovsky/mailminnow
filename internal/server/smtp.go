@@ -45,7 +45,7 @@ func (s *Session) Data(r io.Reader) error {
 	}
 
 	// Once the data is received, save the email
-	slog.Debug("SMTP - saving email")
+	slog.Debug("SMTP saving email")
 	msg, err := mail.ReadMessage(&s.data)
 	if err != nil {
 		slog.Error("SMTP error reading message", "error", err)

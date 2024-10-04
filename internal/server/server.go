@@ -27,6 +27,7 @@ type Email struct {
 	Subject string
 	Body    string
 	Date    time.Time
+	IsHTML  bool
 }
 
 type Server struct {
@@ -47,11 +48,20 @@ type Session struct {
 
 func NewServer() *Server {
 	slog.Info("Creating server...")
-	tmpl, err := template.ParseFS(templateFS, "templates/*.html")
+
+	tmpl := template.New("")
+	tmpl = tmpl.Funcs(template.FuncMap{
+		"safeHTML": func(html string) template.HTML {
+			return template.HTML(html)
+		},
+	})
+
+	tmpl, err := tmpl.ParseFS(templateFS, "templates/*.html")
 	if err != nil {
 		slog.Error("Error parsing embedded templates", "error", err)
 		os.Exit(1)
 	}
+
 	return &Server{
 		emails: make(map[int]Email),
 		tmpl:   tmpl,

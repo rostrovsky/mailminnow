@@ -8,7 +8,11 @@
     <p><strong>From:</strong> {{.From}}</p>
     <p><strong>Date:</strong> {{.Date.Format "2006-01-02 15:04:05"}}</p>
     <hr>
-    <pre>{{.Body}}</pre>
+    {{if .IsHTML}}
+        {{.Body | safeHTML}}
+    {{else}}
+        <pre>{{.Body}}</pre>
+    {{end}}
     <a href="/">← Back to Inbox</a>
 </body>
 </html>

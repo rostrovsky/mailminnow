@@ -3,8 +3,10 @@ package server
 import (
 	"io"
 	"log/slog"
+	"mime"
+	"mime/multipart"
 	"net/mail"
-
+	"strings"
 	"time"
 
 	"github.com/emersion/go-smtp"
@@ -57,12 +59,57 @@ func (s *Session) Data(r io.Reader) error {
 		return err
 	}
 
+	contentType := msg.Header.Get("Content-Type")
+	mediaType, params, err := mime.ParseMediaType(contentType)
+	if err != nil {
+		slog.Error("SMTP error parsing content type", "error", err)
+		return err
+	}
+
+	var bodyContent string
+	var isHTML bool
+
+	if strings.HasPrefix(mediaType, "text/html") {
+		bodyContent = string(body)
+		isHTML = true
+	} else if strings.HasPrefix(mediaType, "text/plain") {
+		bodyContent = string(body)
+		isHTML = false
+	} else if strings.HasPrefix(mediaType, "multipart/") {
+		mr := multipart.NewReader(msg.Body, params["boundary"])
+		for {
+			p, err := mr.NextPart()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				slog.Error("SMTP error reading multipart", "error", err)
+				return err
+			}
+			slurp, err := io.ReadAll(p)
+			if err != nil {
+				slog.Error("SMTP error reading part", "error", err)
+				return err
+			}
+			partContentType := p.Header.Get("Content-Type")
+			if strings.HasPrefix(partContentType, "text/html") {
+				bodyContent = string(slurp)
+				isHTML = true
+				break
+			} else if strings.HasPrefix(partContentType, "text/plain") && bodyContent == "" {
+				bodyContent = string(slurp)
+				isHTML = false
+			}
+		}
+	}
+
 	email := Email{
 		From:    s.from,
 		To:      s.to,
 		Subject: subject,
-		Body:    string(body),
+		Body:    bodyContent,
 		Date:    time.Now(),
+		IsHTML:  isHTML,
 	}
 
 	s.server.mutex.Lock()

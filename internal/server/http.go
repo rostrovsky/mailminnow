@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/base64"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -79,6 +80,10 @@ func (s *Server) handleEmail(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Cannot open email", "id", id)
 		http.Error(w, "Email not found", http.StatusNotFound)
 		return
+	}
+
+	if email.IsHTML {
+		email.Body = base64.StdEncoding.EncodeToString([]byte(email.Body))
 	}
 
 	s.tmpl.ExecuteTemplate(w, "email.html", email)

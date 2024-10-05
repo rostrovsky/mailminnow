@@ -2,17 +2,48 @@
 <html>
 <head>
     <title>{{.Subject}} - MailMinnow</title>
+    <style>
+        /* Ensure body takes the full viewport height */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh; /* Full viewport height */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Ensure the iframe takes up the remaining space */
+        #email-content-frame {
+            width: 100%;
+            flex-grow: 1; /* Take up the remaining height */
+            border: none;
+        }
+
+        /* Additional styling for other elements */
+        p, hr, a {
+            margin: 16px;
+        }
+
+        /* Keep the content section from shrinking too much */
+        .email-header {
+            flex-shrink: 0;
+        }
+    </style>
 </head>
 <body>
-    <p><strong>Subject:</strong> {{.Subject}}</h1>
-    <p><strong>From:</strong> {{.From}}</p>
-    <p><strong>Date:</strong> {{.Date.Format "2006-01-02 15:04:05"}}</p>
-    <hr>
+    <div class="email-header">
+        <p><strong>Subject:</strong> {{.Subject}}</p>
+        <p><strong>From:</strong> {{.From}}</p>
+        <p><strong>Date:</strong> {{.Date.Format "2006-01-02 15:04:05"}}</p>
+        <hr>
+    </div>
+    
     {{if .IsHTML}}
-        {{.Body | safeHTML}}
+        <iframe id="email-content-frame" src="data:text/html;base64,{{.Body | safeHTML}}"></iframe>
     {{else}}
-        <pre>{{.Body}}</pre>
+        <pre style="flex-grow: 1; margin: 16px;">{{.Body}}</pre>
     {{end}}
+
     <a href="/">← Back to Inbox</a>
 </body>
 </html>

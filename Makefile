@@ -16,3 +16,8 @@ wip:
 .PHONY: fmt
 fmt:
 	gofmt -w .
+
+
+.PHONY: send
+send:
+	./send-mails.sh

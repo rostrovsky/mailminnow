@@ -20,6 +20,9 @@ import (
 //go:embed templates/*.html
 var templateFS embed.FS
 
+//go:embed static
+var staticFS embed.FS
+
 type Email struct {
 	ID      int
 	From    string
@@ -112,9 +115,12 @@ func RunServer(cmd *cobra.Command, args []string) {
 
 	// Start HTTP server
 	r := mux.NewRouter()
+	fileServer := http.FileServer(http.FS(staticFS))
+
 	r.HandleFunc("/", server.handleInbox).Methods("GET")
 	r.HandleFunc("/email/{id}", server.handleEmail).Methods("GET")
 	r.HandleFunc("/delete/{id}", server.handleDelete).Methods("POST")
+	r.PathPrefix("/static/").Handler(fileServer)
 
 	loggingRouter := LoggingMiddleware(r)
 

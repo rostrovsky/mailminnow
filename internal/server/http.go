@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/base64"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -30,6 +31,32 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 
 // ----
 
+func RenderTemplate(w http.ResponseWriter, subTemplate string, data interface{}) {
+
+	tmplFuncs := template.FuncMap{
+		"safeHTML": func(html string) template.HTML {
+			return template.HTML(html)
+		},
+	}
+
+	tmpl, err := template.New("base.html").Funcs(tmplFuncs).ParseFS(templateFS, "templates/base.html", "templates/"+subTemplate)
+	if err != nil {
+		slog.Error("Error parsing embedded templates", "error", err)
+		http.Error(w, "Failed to parse embedded template", http.StatusInternalServerError)
+		return
+	}
+
+	// Execute the template
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		slog.Error("Failed to render template", "template", subTemplate, "error", err)
+		http.Error(w, "Failed to render template", http.StatusInternalServerError)
+		return
+	}
+}
+
+// ----
+
 func (s *Server) handleInbox(w http.ResponseWriter, r *http.Request) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -37,7 +64,8 @@ func (s *Server) handleInbox(w http.ResponseWriter, r *http.Request) {
 	for _, email := range s.emails {
 		emails = append(emails, email)
 	}
-	s.tmpl.ExecuteTemplate(w, "inbox.html", emails)
+
+	RenderTemplate(w, "inbox.html", emails)
 }
 
 func (s *Server) handleDelete(w http.ResponseWriter, r *http.Request) {
@@ -86,5 +114,5 @@ func (s *Server) handleEmail(w http.ResponseWriter, r *http.Request) {
 		email.Body = base64.StdEncoding.EncodeToString([]byte(email.Body))
 	}
 
-	s.tmpl.ExecuteTemplate(w, "email.html", email)
+	RenderTemplate(w, "email.html", email)
 }

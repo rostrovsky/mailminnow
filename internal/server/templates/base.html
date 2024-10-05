@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{template "title" .}}</title>
+        <style>
+            body,
+            html {
+                margin: 0;
+                padding: 0;
+                height: 100vh;
+                /* Full viewport height */
+                display: flex;
+                flex-direction: column;
+            }
+
+            #email-content-frame {
+                width: 100%;
+                flex-grow: 1;
+                border: none;
+            }
+
+            p,
+            a {
+                margin: 16px;
+            }
+
+            .email-header {
+                flex-shrink: 0;
+            }
+
+            hr {
+                margin-top: 1rem;
+                margin-bottom: 1rem;
+                border-width: 0;
+                border-top: 1px solid #E1E1E1; 
+            }
+        </style>
+    </head>
+    <body>
+        {{template "content" .}}
+    </body>
+</html>

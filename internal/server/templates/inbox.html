@@ -1,22 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Inbox - MailMinnow</title>
-    <link rel="stylesheet" href="/static/normalize.css">
-    <link rel="stylesheet" href="/static/skeleton.css">
-    <link rel="stylesheet" href="/static/custom.css">
-</head>
-<body>
-    <h1>Inbox</h1>
-    <table class="u-full-width">
-    <thead>
-        <tr>
-            <th>Subject</th>
-            <th>From</th>
-            <th>Date</th>
-            <th>Action</th>
-        </tr>
-    </thead>
+{{block "title" .}}Inbox - MailMinno{{end}}
+
+{{block "content" .}}
+<h1>Inbox</h1>
+    <table>
         <tbody>
             {{range .}}
             <tr>
@@ -32,5 +18,4 @@
             {{end}}
         </tbody>
     </table>
-</body>
-</html>
+{{end}}

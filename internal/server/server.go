@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
-	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
@@ -20,9 +19,6 @@ import (
 //go:embed templates/*.html
 var templateFS embed.FS
 
-//go:embed static
-var staticFS embed.FS
-
 type Email struct {
 	ID      int
 	From    string
@@ -37,7 +33,6 @@ type Server struct {
 	emails map[int]Email
 	nextID int
 	mutex  sync.Mutex
-	tmpl   *template.Template
 }
 
 type Session struct {
@@ -51,23 +46,8 @@ type Session struct {
 
 func NewServer() *Server {
 	slog.Info("Creating server...")
-
-	tmpl := template.New("")
-	tmpl = tmpl.Funcs(template.FuncMap{
-		"safeHTML": func(html string) template.HTML {
-			return template.HTML(html)
-		},
-	})
-
-	tmpl, err := tmpl.ParseFS(templateFS, "templates/*.html")
-	if err != nil {
-		slog.Error("Error parsing embedded templates", "error", err)
-		os.Exit(1)
-	}
-
 	return &Server{
 		emails: make(map[int]Email),
-		tmpl:   tmpl,
 	}
 }
 
@@ -115,12 +95,10 @@ func RunServer(cmd *cobra.Command, args []string) {
 
 	// Start HTTP server
 	r := mux.NewRouter()
-	fileServer := http.FileServer(http.FS(staticFS))
 
 	r.HandleFunc("/", server.handleInbox).Methods("GET")
 	r.HandleFunc("/email/{id}", server.handleEmail).Methods("GET")
 	r.HandleFunc("/delete/{id}", server.handleDelete).Methods("POST")
-	r.PathPrefix("/static/").Handler(fileServer)
 
 	loggingRouter := LoggingMiddleware(r)
 

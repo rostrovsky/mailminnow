@@ -62,8 +62,7 @@ func (s *Session) Data(r io.Reader) error {
 	contentType := msg.Header.Get("Content-Type")
 	mediaType, params, err := mime.ParseMediaType(contentType)
 	if err != nil {
-		slog.Error("SMTP error parsing content type", "error", err)
-		return err
+		slog.Warn("SMTP error parsing content type, contant type will fallback to text/plain", "error", err)
 	}
 
 	var bodyContent string
@@ -72,7 +71,7 @@ func (s *Session) Data(r io.Reader) error {
 	if strings.HasPrefix(mediaType, "text/html") {
 		bodyContent = string(body)
 		isHTML = true
-	} else if strings.HasPrefix(mediaType, "text/plain") {
+	} else if strings.HasPrefix(mediaType, "text/plain") || mediaType == "" {
 		bodyContent = string(body)
 		isHTML = false
 	} else if strings.HasPrefix(mediaType, "multipart/") {

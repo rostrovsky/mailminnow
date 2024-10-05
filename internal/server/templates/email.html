@@ -8,6 +8,8 @@
 </head>
 <body>
     <div class="email-header">
+        <p><a class="button" href="/">← Back to Inbox</a></p>
+        <hr>
         <p><strong>Subject:</strong> {{.Subject}}</p>
         <p><strong>From:</strong> {{.From}}</p>
         <p><strong>Date:</strong> {{.Date.Format "2006-01-02 15:04:05"}}</p>
@@ -19,7 +21,5 @@
     {{else}}
         <pre style="flex-grow: 1; margin: 16px;">{{.Body}}</pre>
     {{end}}
-
-    <a href="/">← Back to Inbox</a>
 </body>
 </html>

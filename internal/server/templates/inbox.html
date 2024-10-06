@@ -3,11 +3,21 @@
 {{block "content" .}}
 <h1>Inbox</h1>
     <table>
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
         <tbody>
             {{range .}}
             <tr>
                 <td><a href="/email/{{.ID}}">{{.Subject}}</a></td>
                 <td>{{.From}}</td>
+                <td>{{.To}}</td>
                 <td>({{.Date.Format "2006-01-02 15:04:05"}})</td>
                 <td>
                     <form action="/delete/{{.ID}}" method="post" style="display: inline;">

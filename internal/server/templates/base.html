@@ -15,24 +15,45 @@
                 margin: 0;
                 padding: 0;
                 height: 100vh;
-                /* Full viewport height */
                 display: flex;
                 flex-direction: column;
             }
 
             html {
-                font-size: 18px;
+                font-size: 16px;
             }
 
             body {
                 font-family: 'Noto Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            header {
+                background-color: black;
+                color: white;
+                padding: 0rem 1rem;
+            }
+
+            .content {
+                flex: 1 0 auto;
                 padding: 16px;
+                display: flex;
+                flex-direction: column;
+            }
+
+            footer {
+                flex-shrink: 0;
+                background-color: #f8f8f8;
+                text-align: center;
+                padding: 0;
+                font-size: 0.75rem;
+                border-top: 1px solid #E1E1E1;
             }
 
             #email-content-frame {
                 width: 100%;
                 flex-grow: 1;
                 border: none;
+                min-height: 500px;
             }
 
             .email-header {
@@ -44,6 +65,11 @@
                 margin-bottom: 1rem;
                 border-width: 0;
                 border-top: 1px solid #E1E1E1; 
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
             }
 
             td {
@@ -83,6 +109,14 @@
         </style>
     </head>
     <body>
-        {{template "content" .}}
+        <header>
+            <h3>MailMinnow</h3>
+        </header>
+        <div class="content">
+            {{template "content" .}}
+        </div>
+        <footer>
+            <p>MailMinnow | <a href="https://github.com/rostrovsky/mailminnow" target="_blank">GitHub</a></p>
+        </footer>
     </body>
 </html>

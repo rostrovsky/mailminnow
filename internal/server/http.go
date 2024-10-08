@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log/slog"
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
 
@@ -60,14 +61,19 @@ func RenderTemplate(w http.ResponseWriter, subTemplate string, data interface{})
 func (s *Server) handleInbox(w http.ResponseWriter, r *http.Request) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
+	
 	emails := make([]Email, 0, len(s.emails))
 	for _, email := range s.emails {
 		emails = append(emails, email)
 	}
 
+	// Sort emails by date, most recent first
+	sort.Slice(emails, func(i, j int) bool {
+		return emails[i].Date.After(emails[j].Date)
+	})
+
 	RenderTemplate(w, "inbox.html", emails)
 }
-
 func (s *Server) handleDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr := vars["id"]

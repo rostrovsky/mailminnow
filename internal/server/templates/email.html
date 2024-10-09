@@ -1,0 +1,19 @@
+{{block "title" .}}{{.Subject}} - MailMinnow{{end}}
+
+{{block "content" .}}
+    <div class="email-header">
+        <p><a class="button" href="/">← Back to Inbox</a></p>
+        <hr>
+        <p><strong>Subject:</strong> {{.Subject}}</p>
+        <p><strong>From:</strong> {{.From}}</p>
+        <p><strong>To:</strong> {{.To}}</p>
+        <p><strong>Date:</strong> {{.Date.Format "2006-01-02 15:04:05"}}</p>
+        <hr>
+    </div>
+    
+    {{if .IsHTML}}
+        <iframe id="email-content-frame" src="data:text/html;base64,{{.Body | safeHTML}}"></iframe>
+    {{else}}
+        <pre style="flex-grow: 1; margin: 16px;">{{.Body}}</pre>
+    {{end}}
+{{end}}

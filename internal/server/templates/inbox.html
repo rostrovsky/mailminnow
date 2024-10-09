@@ -1,0 +1,31 @@
+{{block "title" .}}Inbox - MailMinno{{end}}
+
+{{block "content" .}}
+<h2>✉ Inbox</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .}}
+            <tr>
+                <td><a href="/email/{{.ID}}">{{.Subject}}</a></td>
+                <td>{{.From}}</td>
+                <td>{{.To}}</td>
+                <td>({{.Date.Format "2006-01-02 15:04:05"}})</td>
+                <td>
+                    <form action="/delete/{{.ID}}" method="post" style="display: inline;">
+                        <input type="submit" value="✕ Delete" class="delete">
+                    </form>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+{{end}}
